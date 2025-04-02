@@ -185,10 +185,10 @@ function renderEditorTab() {
             </div>
             
             <div class="vehicle-info-fields mt-3">
-              <div class="vehicle-info-field">VIN: ${currentVehicle.id}</div>
-              <div class="vehicle-info-field">库存号: ${currentVehicle.stockNumber}</div>
-              <div class="vehicle-info-field"><span class="vehicle-highlight-info">${currentVehicle.mileage}</span></div>
-              <div class="vehicle-info-field"><span class="vehicle-highlight-info">${currentVehicle.price}</span></div>
+              <div class="vehicle-info-field">${currentVehicle.id}</div>
+              <div class="vehicle-info-field">${currentVehicle.stockNumber}</div>
+              <div class="vehicle-info-field">${currentVehicle.mileage}</div>
+              <div class="vehicle-info-field">${currentVehicle.price}</div>
             </div>
           </div>
           
@@ -552,8 +552,8 @@ function renderHistoryTab() {
                 </div>
               </td>
               <td>${item.vehicle.stockNumber}</td>
-              <td><span class="vehicle-highlight-info">${item.vehicle.mileage}</span></td>
-              <td><span class="vehicle-highlight-info">${item.vehicle.price}</span></td>
+              <td>${item.vehicle.mileage}</td>
+              <td>${item.vehicle.price}</td>
               <td>${item.username || userAccounts[0].username}</td>
               <td>
                 <a href="${item.postUrl}" target="_blank" class="post-link">${item.title}</a>
