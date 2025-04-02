@@ -20,7 +20,7 @@ const vehicleData = {
       if (i === 2) return null; // 跳过不存在的图片
       return {
         id: i + 1,
-        url: `./src/assets/images/vehicle/vehicle_10183_user_photo_${i+1}.jpeg`,
+        url: `/images/vehicle/vehicle_10183_user_photo_${i+1}.jpeg`,
         selected: false,
         order: null
       };
@@ -36,7 +36,7 @@ const vehicleData = {
     images: Array(4).fill().map((_, i) => {
       return {
         id: i + 1,
-        url: `./src/assets/images/vehicle/vehicle_10183_user_photo_${i+1}.jpeg`,
+        url: `/images/vehicle/vehicle_10183_user_photo_${i+1}.jpeg`,
         selected: false,
         order: null
       };
@@ -52,7 +52,7 @@ const vehicleData = {
     images: Array(6).fill().map((_, i) => {
       return {
         id: i + 1,
-        url: `./src/assets/images/vehicle/vehicle_10183_user_photo_${i+5}.jpeg`,
+        url: `/images/vehicle/vehicle_10183_user_photo_${i+5}.jpeg`,
         selected: false,
         order: null
       };
