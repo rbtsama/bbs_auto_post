@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "BBS自动发帖系统 - Vue 3 + TypeScript版",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
