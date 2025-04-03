@@ -4,8 +4,12 @@
  */
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+  // 插件
+  plugins: [vue()],
+
   // 开发服务器配置
   server: {
     port: 3000,
