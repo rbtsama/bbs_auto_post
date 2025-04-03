@@ -33,7 +33,7 @@ export default defineConfig({
   },
   
   // 公共基础路径
-  base: './',
+  base: '/',
   
   // 配置资源处理
   publicDir: 'public'
