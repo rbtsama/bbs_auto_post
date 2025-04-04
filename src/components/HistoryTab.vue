@@ -264,7 +264,7 @@ export default defineComponent({
         case 'failed':
           return '失败';
         case 'canceled':
-          return '取消发送';
+          return '已取消';
         default:
           return '';
       }
