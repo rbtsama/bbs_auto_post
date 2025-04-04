@@ -1,21 +1,20 @@
 <template>
-  <TabNavigation class="max-w-7xl mx-auto" />
+  <TabNavigation class="max-w-7xl mx-auto" :activeTab="activeTab" @change="activeTab = $event" />
   
   <div class="bg-white shadow-md rounded-lg p-4 max-w-7xl mx-auto mb-6">
-    <PostEditorTab v-if="activeTabStore.activeTab === 'editor'" />
-    <HistoryTab v-else-if="activeTabStore.activeTab === 'history'" />
+    <PostEditorTab v-if="activeTab === 'editor'" @switchTab="activeTab = $event" />
+    <HistoryTab v-else-if="activeTab === 'history'" />
   </div>
   
-  <ToastContainer />
+  <ToastContainer :messages="toastMessages" @remove="removeToast" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import TabNavigation from '@/components/TabNavigation.vue';
 import PostEditorTab from '@/components/PostEditorTab.vue';
 import HistoryTab from '@/components/HistoryTab.vue';
 import ToastContainer from '@/components/ToastContainer.vue';
-import { useActiveTabStore, useHistoryStore, useVehicleStore, useUserStore, useToastStore } from '@/stores';
 
 /**
  * 主页组件
@@ -31,38 +30,32 @@ export default defineComponent({
     ToastContainer
   },
   setup() {
-    const activeTabStore = useActiveTabStore();
-    const historyStore = useHistoryStore();
-    const vehicleStore = useVehicleStore();
-    const userStore = useUserStore();
-    const toastStore = useToastStore();
+    // 本地状态管理
+    const activeTab = ref('editor');
+    const toastMessages = ref<Array<{id: string, message: string, type: string}>>([]);
     
-    /**
-     * 初始化并加载应用所需数据
-     * 包括车辆、用户、图片和历史记录
-     */
-    onMounted(async () => {
-      try {
-        await Promise.all([
-          vehicleStore.fetchVehicles(),
-          userStore.fetchUsers(),
-          historyStore.fetchHistory()
-        ]);
-        
-        if (vehicleStore.selectedVehicleId) {
-          await vehicleStore.fetchImages();
-        }
-      } catch (error) {
-        toastStore.showToast('数据加载失败，请刷新页面重试', 'error');
+    // Toast处理
+    const showToast = (message: string, type: string = 'info') => {
+      const id = Date.now().toString();
+      toastMessages.value.push({ id, message, type });
+      
+      setTimeout(() => {
+        removeToast(id);
+      }, 3000);
+    };
+    
+    const removeToast = (id: string) => {
+      const index = toastMessages.value.findIndex(m => m.id === id);
+      if (index > -1) {
+        toastMessages.value.splice(index, 1);
       }
-    });
+    };
     
     return {
-      activeTabStore,
-      historyStore,
-      vehicleStore,
-      userStore,
-      toastStore
+      activeTab,
+      toastMessages,
+      showToast,
+      removeToast
     };
   }
 });

@@ -1,59 +1,62 @@
 <template>
   <table class="w-full border-collapse text-sm">
     <thead>
-      <tr class="bg-gray-50 border-b border-gray-200">
-        <th class="px-4 py-3 text-left font-medium text-gray-600">VIN</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">车辆信息</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">里程</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">价格</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">发帖用户</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">帖子主题</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">排队时间 (PST)</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600">计划执行时间 (PST)</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600 min-w-[96px]">状态</th>
-        <th class="px-4 py-3 text-left font-medium text-gray-600 min-w-[120px]">操作</th>
+      <tr class="bg-blue-50 border-b border-blue-200">
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">VIN</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">车辆信息</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">里程</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">价格</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">发帖用户</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">帖子主题</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">排队时间 (PST)</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700">计划 / 执行时间 (PST)</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700 min-w-[96px]">状态</th>
+        <th class="px-4 py-4 text-left font-semibold text-gray-700 min-w-[120px]">操作</th>
       </tr>
     </thead>
     <tbody>
       <tr 
-        v-for="item in historyStore.sortedRecords" 
+        v-for="(item, index) in historyStore.sortedRecords" 
         :key="item.id"
-        class="border-b border-gray-100 hover:bg-gray-50"
+        :class="[
+          'border-b border-gray-100 hover:bg-blue-50/30 transition-colors duration-150',
+          index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+        ]"
       >
-        <td class="px-4 py-3 text-gray-700 whitespace-nowrap">{{ item.vehicle.id }}</td>
-        <td class="px-4 py-3">
+        <td class="px-4 py-4 text-gray-700 whitespace-nowrap">{{ item.vehicle.id }}</td>
+        <td class="px-4 py-4">
           <div class="flex flex-col">
-            <span class="text-gray-800 font-medium">{{ formatVehicleModel(item.vehicle.model) }}</span>
-            <span class="text-xs text-gray-500">{{ item.vehicle.details }}</span>
+            <span class="text-gray-700 font-medium">{{ formatVehicleModel(item.vehicle.model) }}</span>
+            <span class="text-xs text-gray-500 mt-1">{{ item.vehicle.details }}</span>
           </div>
         </td>
-        <td class="px-4 py-3 text-gray-800 font-medium">{{ item.vehicle.mileage }}</td>
-        <td class="px-4 py-3 text-gray-800 font-medium">{{ item.vehicle.price }}</td>
-        <td class="px-4 py-3 text-gray-700">{{ item.username }}</td>
-        <td class="px-4 py-3 text-gray-800">
+        <td class="px-4 py-4 text-gray-700 font-medium">{{ item.vehicle.mileage }}</td>
+        <td class="px-4 py-4 text-gray-700 font-medium">{{ item.vehicle.price }}</td>
+        <td class="px-4 py-4 text-gray-700">{{ item.username }}</td>
+        <td class="px-4 py-4 text-gray-700">
           <a :href="item.postUrl" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">{{ item.title }}</a>
         </td>
-        <td class="px-4 py-3 text-gray-600">{{ formatDate(item.queueTime) }}</td>
-        <td class="px-4 py-3 text-gray-600">{{ formatDate(item.executeTime) }}</td>
-        <td class="px-4 py-3">
-          <span :class="getStatusClass(item.status)" class="text-sm font-medium">
+        <td class="px-4 py-4 text-gray-700">{{ formatDate(item.queueTime) }}</td>
+        <td class="px-4 py-4 text-gray-700">{{ formatDate(item.executeTime) }}</td>
+        <td class="px-4 py-4">
+          <span :class="getStatusClass(item.status)" class="text-sm font-bold px-2 py-1 rounded-full">
             {{ getStatusText(item.status) }}
           </span>
         </td>
-        <td class="px-4 py-3 min-w-[120px]">
-          <div class="flex gap-2">
+        <td class="px-4 py-4 min-w-[120px]">
+          <div class="flex flex-col gap-2">
             <button 
               @click="showSnapshot(item)"
-              class="text-sm border border-blue-200 text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-md transition duration-200 whitespace-nowrap"
+              class="text-sm border border-blue-200 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-md transition duration-200 whitespace-nowrap"
             >
               查看快照
             </button>
             <button 
               v-if="item.status === 'pending'" 
               @click="confirmCancel(item.id)"
-              class="text-sm border border-red-200 text-red-600 hover:bg-red-50 px-2 py-1 rounded-md transition duration-200 whitespace-nowrap"
+              class="text-sm border border-red-200 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition duration-200 whitespace-nowrap"
             >
-              取消发帖
+              取消发送
             </button>
           </div>
         </td>
@@ -78,10 +81,10 @@
           <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
             <h5 class="font-medium text-gray-800 mb-3">车辆基本信息</h5>
             <div class="grid grid-cols-2 gap-3 text-sm">
-              <div class="text-gray-700">VIN: <span class="text-gray-900">{{ selectedPost.vehicle.id }}</span></div>
-              <div class="text-gray-700">库存号: <span class="text-gray-900">{{ selectedPost.vehicle.stockNumber }}</span></div>
-              <div class="text-gray-700">车型: <span class="text-gray-900">{{ formatVehicleModel(selectedPost.vehicle.model) }}</span></div>
-              <div class="text-gray-700">详情: <span class="text-gray-900">{{ selectedPost.vehicle.details }}</span></div>
+              <div class="text-gray-700">VIN: <span class="text-gray-700">{{ selectedPost.vehicle.id }}</span></div>
+              <div class="text-gray-700">库存号: <span class="text-gray-700">{{ selectedPost.vehicle.stockNumber }}</span></div>
+              <div class="text-gray-700">车型: <span class="text-gray-700">{{ formatVehicleModel(selectedPost.vehicle.model) }}</span></div>
+              <div class="text-gray-700">详情: <span class="text-gray-700">{{ selectedPost.vehicle.details }}</span></div>
               <div class="text-gray-700">里程: <span class="text-blue-600 font-medium">{{ selectedPost.vehicle.mileage }}</span></div>
               <div class="text-gray-700">价格: <span class="text-blue-600 font-medium">{{ selectedPost.vehicle.price }}</span></div>
             </div>
@@ -91,20 +94,20 @@
           <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
             <div class="flex flex-wrap gap-4 text-sm">
               <div class="flex items-center">
-                <span class="text-gray-500 mr-2">发布用户:</span>
-                <span class="text-gray-900 font-medium">{{ selectedPost.username }}</span>
+                <span class="text-gray-700 mr-2">发布用户:</span>
+                <span class="text-gray-700 font-medium">{{ selectedPost.username }}</span>
               </div>
               <div class="flex items-center">
-                <span class="text-gray-500 mr-2">排队时间:</span>
-                <span class="text-gray-900">{{ formatDate(selectedPost.queueTime) }}</span>
+                <span class="text-gray-700 mr-2">排队时间:</span>
+                <span class="text-gray-700">{{ formatDate(selectedPost.queueTime) }}</span>
               </div>
               <div class="flex items-center">
-                <span class="text-gray-500 mr-2">发布时间:</span>
-                <span class="text-gray-900">{{ formatDate(selectedPost.executeTime) }}</span>
+                <span class="text-gray-700 mr-2">发布时间:</span>
+                <span class="text-gray-700">{{ formatDate(selectedPost.executeTime) }}</span>
               </div>
               <div class="flex items-center">
-                <span class="text-gray-500 mr-2">状态:</span>
-                <span :class="getStatusClass(selectedPost.status)">{{ getStatusText(selectedPost.status) }}</span>
+                <span class="text-gray-700 mr-2">状态:</span>
+                <span :class="getStatusClass(selectedPost.status)" class="font-bold">{{ getStatusText(selectedPost.status) }}</span>
               </div>
             </div>
           </div>
@@ -336,5 +339,25 @@ export default defineComponent({
 <style scoped>
 .aspect-\[4\/3\] {
   aspect-ratio: 4/3;
+}
+
+/* 添加以下样式提高表格可读性 */
+table {
+  border-spacing: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+th {
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+td {
+  vertical-align: middle;
+}
+
+tbody tr {
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.015);
 }
 </style> 

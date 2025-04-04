@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg overflow-hidden" v-if="vehicleStore.images.length > 0">
+  <div class="bg-white rounded-lg overflow-hidden" v-if="images.length > 0">
     <!-- 图片预览模态框 -->
     <div v-if="previewImage" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" @click="closePreview">
       <div class="relative max-w-[900px] max-h-[90vh] flex items-center justify-center">
@@ -12,9 +12,9 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-5 gap-4 mt-2">
+    <div class="grid grid-cols-4 gap-4 mt-2">
       <div 
-        v-for="(image, index) in vehicleStore.images" 
+        v-for="(image, index) in images" 
         :key="index" 
         class="relative rounded-lg border border-gray-200 hover:border-blue-500 flex justify-center items-center cursor-pointer aspect-square overflow-hidden p-2 transition duration-200 shadow-sm hover:shadow-md"
         @click="toggleImageSelection(image)"
@@ -60,8 +60,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, watch, ref } from 'vue';
-import { useVehicleStore, useToastStore } from '@/stores';
+import { defineComponent, onMounted, watch, ref, PropType } from 'vue';
 
 /**
  * 图片选择器组件
@@ -74,23 +73,44 @@ export default defineComponent({
     maxHeight: {
       type: String,
       default: '400px'
+    },
+    selectedVehicleId: {
+      type: String,
+      required: true
     }
   },
-  setup(props) {
-    const vehicleStore = useVehicleStore();
-    const toastStore = useToastStore();
+  emits: ['update:selectedImages'],
+  setup(props, { emit }) {
+    // Toast消息状态
+    const toastMessages = ref<Array<{id: string, message: string, type: string}>>([]);
+    
+    // 图片状态
+    const images = ref<string[]>([]);
+    const selectedImages = ref<string[]>([]);
+    const previewImage = ref<string | null>(null);
     
     /**
-     * 预览图片状态
+     * 显示toast消息
      */
-    const previewImage = ref<string | null>(null);
+    const showToast = (message: string, type: string = 'info') => {
+      const id = Date.now().toString();
+      toastMessages.value.push({ id, message, type });
+      
+      setTimeout(() => {
+        const index = toastMessages.value.findIndex(m => m.id === id);
+        if (index > -1) {
+          toastMessages.value.splice(index, 1);
+        }
+      }, 3000);
+    };
     
     /**
      * 初始化组件
      * 加载当前车辆对应的图片
      */
     onMounted(async () => {
-      if (vehicleStore.selectedVehicleId) {
+      console.log('ImageSelector 组件已挂载，车辆ID:', props.selectedVehicleId);
+      if (props.selectedVehicleId) {
         await loadImages();
       }
     });
@@ -101,10 +121,45 @@ export default defineComponent({
      */
     const loadImages = async () => {
       try {
-        await vehicleStore.fetchImages();
+        console.log('正在加载图片，车辆ID:', props.selectedVehicleId);
+        // 模拟API延迟
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 从本地目录加载图片
+        const imagePrefix = '/moke_photo';
+        
+        // 重置图片数组
+        images.value = [];
+        
+        // 获取当前车辆对应的图片
+        const imageMap: Record<string, number[]> = {
+          '5UXKR0C5XF0K59737': [1, 2, 3, 4, 5], // BMW X5
+          'ZAM57RTA6F1149408': [2, 3, 4, 5, 6], // Maserati Ghibli
+          'WDDHF5KB6GB261473': [3, 4, 5, 6, 7], // Mercedes E-Class
+          '1FTEW1EP1JKE07430': [4, 5, 6, 7, 8], // Ford F-150
+          '5TDZA3EH8DS037305': [5, 6, 7, 8, 9], // Toyota Highlander 2013
+          'WA1LFAFP6CA072271': [6, 7, 8, 9, 10], // Audi Q5
+          '5TDZK3EH0BS043058': [7, 8, 9, 10, 11], // Toyota Highlander 2011
+          'KNMAT2MT4HP583428': [8, 9, 10, 11, 12] // Nissan Rogue
+        };
+        
+        // 获取当前车辆的图片集或使用默认图片集
+        const imageIndexes = imageMap[props.selectedVehicleId] || [1, 2, 3, 4, 5];
+        
+        // 构建图片路径数组
+        const newImages = imageIndexes.map(index => 
+          `${imagePrefix}/vehicle_10183_user_photo_${index}.jpeg`
+        );
+        
+        // 确保UI更新
+        setTimeout(() => {
+          images.value = newImages;
+          console.log(`已加载 ${images.value.length} 张图片，车辆ID: ${props.selectedVehicleId}`);
+        }, 0);
       } catch (error) {
-        console.error('加载图片失败:', error);
-        toastStore.showToast('图片加载失败，请刷新页面重试', 'error');
+        console.error('加载图片时出错:', error);
+        images.value = []; // 出错时重置图片数组
+        showToast('图片加载失败，请刷新页面重试', 'error');
       }
     };
     
@@ -113,7 +168,13 @@ export default defineComponent({
      * @param {string} imageUrl - 图片URL
      */
     const toggleImageSelection = (imageUrl: string) => {
-      vehicleStore.toggleImageSelection(imageUrl);
+      const index = selectedImages.value.indexOf(imageUrl);
+      if (index > -1) {
+        selectedImages.value.splice(index, 1);
+      } else {
+        selectedImages.value.push(imageUrl);
+      }
+      emit('update:selectedImages', selectedImages.value);
     };
     
     /**
@@ -121,7 +182,7 @@ export default defineComponent({
      * @param {string} imageUrl - 图片URL
      */
     const isSelected = (imageUrl: string) => {
-      return vehicleStore.selectedImageIds.includes(imageUrl);
+      return selectedImages.value.includes(imageUrl);
     };
     
     /**
@@ -129,7 +190,7 @@ export default defineComponent({
      * @param {string} imageUrl - 图片URL
      */
     const getImageOrder = (imageUrl: string) => {
-      return vehicleStore.selectedImageIds.indexOf(imageUrl) + 1;
+      return selectedImages.value.indexOf(imageUrl) + 1;
     };
     
     /**
@@ -137,8 +198,8 @@ export default defineComponent({
      * @param {Event} event - 错误事件
      */
     const handleImageError = (index: number) => {
-      console.error(`图片加载失败: ${vehicleStore.images[index]}`);
-      toastStore.showToast('部分图片加载失败', 'warning');
+      console.error(`图片加载失败: ${images.value[index]}`);
+      showToast('部分图片加载失败', 'warning');
     };
     
     /**
@@ -159,14 +220,16 @@ export default defineComponent({
     /**
      * 监听车辆变化，重新加载对应图片
      */
-    watch(() => vehicleStore.selectedVehicleId, async (newVal, oldVal) => {
+    watch(() => props.selectedVehicleId, async (newVal, oldVal) => {
+      console.log('车辆ID变更:', oldVal, '->', newVal);
       if (newVal && newVal !== oldVal) {
         await loadImages();
       }
-    });
+    }, { immediate: true });
     
     return {
-      vehicleStore,
+      images,
+      selectedImages,
       toggleImageSelection,
       isSelected,
       getImageOrder,

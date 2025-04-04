@@ -2,14 +2,14 @@
   <div class="flex border-b mb-6">
     <button 
       class="py-2 px-4 font-medium"
-      :class="activeTabStore.activeTab === 'editor' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-blue-500'"
+      :class="activeTab === 'editor' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-blue-500'"
       @click="setActiveTab('editor')"
     >
       发帖编辑器
     </button>
     <button 
       class="py-2 px-4 font-medium"
-      :class="activeTabStore.activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-blue-500'"
+      :class="activeTab === 'history' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-blue-500'"
       @click="setActiveTab('history')"
     >
       发帖历史
@@ -19,7 +19,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useActiveTabStore } from '@/stores';
 
 /**
  * 标签导航组件
@@ -28,19 +27,23 @@ import { useActiveTabStore } from '@/stores';
  */
 export default defineComponent({
   name: 'TabNavigation',
-  setup() {
-    const activeTabStore = useActiveTabStore();
-    
+  props: {
+    activeTab: {
+      type: String,
+      default: 'editor'
+    }
+  },
+  emits: ['change'],
+  setup(props, { emit }) {
     /**
      * 设置当前活动标签页
      * @param {string} tab - 标签页ID
      */
     const setActiveTab = (tab: 'editor' | 'history') => {
-      activeTabStore.setActiveTab(tab);
+      emit('change', tab);
     };
     
     return {
-      activeTabStore,
       setActiveTab
     };
   }

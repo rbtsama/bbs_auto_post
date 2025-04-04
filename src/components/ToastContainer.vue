@@ -1,7 +1,7 @@
 <template>
   <div class="toast-container fixed top-4 right-4 z-50">
     <div 
-      v-for="message in toastStore.messages" 
+      v-for="message in messages" 
       :key="message.id" 
       class="toast p-4 mb-2 rounded-lg shadow-lg max-w-md flex items-center border"
       :class="getToastClass(message.type)"
@@ -24,7 +24,7 @@
         {{ message.message }}
       </div>
       <button 
-        @click="toastStore.removeToast(message.id)" 
+        @click="$emit('remove', message.id)" 
         class="ml-auto text-gray-500 hover:text-gray-700"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -36,9 +36,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useToastStore } from '@/stores';
-import { ToastType } from '@/types';
+import { defineComponent, PropType } from 'vue';
+
+interface ToastMessage {
+  id: string;
+  message: string;
+  type: string;
+  visible?: boolean;
+}
 
 /**
  * 消息提示容器组件
@@ -47,15 +52,20 @@ import { ToastType } from '@/types';
  */
 export default defineComponent({
   name: 'ToastContainer',
+  props: {
+    messages: {
+      type: Array as PropType<ToastMessage[]>,
+      default: () => []
+    }
+  },
+  emits: ['remove'],
   setup() {
-    const toastStore = useToastStore();
-    
     /**
      * 获取Toast消息类型对应的CSS类
-     * @param {ToastType} type - 消息类型
+     * @param {string} type - 消息类型
      * @returns {string} CSS类名组合
      */
-    const getToastClass = (type: ToastType): string => {
+    const getToastClass = (type: string): string => {
       switch (type) {
         case 'success':
           return 'bg-green-50 border-green-200 text-green-800';
@@ -70,7 +80,6 @@ export default defineComponent({
     };
     
     return {
-      toastStore,
       getToastClass
     };
   }
